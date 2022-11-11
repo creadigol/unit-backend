@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Socket.IO chat</title>
+    <style>
+      body { margin: 0; padding-bottom: 3rem; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+
+      #form { background: rgba(0, 0, 0, 0.15); padding: 0.25rem; position: fixed; bottom: 0; left: 0; right: 0; display: flex; height: 3rem; box-sizing: border-box; backdrop-filter: blur(10px); }
+      #usernme, #input { border: none; padding: 0 1rem; flex-grow: 1; border-radius: 2rem; margin: 0.25rem; }
+      #username:focus, #input:focus { outline: none; }
+      #form > button { background: #333; border: none; padding: 0 1rem; margin: 0.25rem; border-radius: 3px; outline: none; color: #fff; }
+
+      #messages { list-style-type: none; margin: 0; padding: 0; }
+      #messages > li { padding: 0.5rem 1rem; }
+      #messages > li:nth-child(odd) { background: #efefef; }
+    </style>
+  </head>
+  <body>
+    <ul id="messages"></ul>
+    <form id="form" action="">
+      <input name="username" id="username" autocomplete="off" />
+      <input name="message" id="input" autocomplete="off" /><button type="submit">Send</button>
+    </form>
+    <script src="/socket.io/socket.io.js"></script>
+
+    <script>
+      var socket = io();
+
+      var messages = document.getElementById('messages');
+      var form = document.getElementById('form');
+      var input = document.getElementById('input');
+      var name = document.getElementById('username');
+
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+          var username = e.target.username.value;
+          var message = e.target.message.value;
+          var sentdata = {name: username, message: message};
+            console.log("sentdata")
+            console.log(sentdata)
+            socket.emit('chat message', sentdata);
+
+            e.target.reset();
+      });
+
+      socket.on('updateHistory', function(msg) {
+          var html = '';
+          for (let i = 0; i < msg.length; i++) {
+              html += "<li> "+msg[i].name+" : "+msg[i].message+" </li>";
+
+              if(i == (msg.length-1)){
+                messages.innerHTML(html);   
+                console.log("complete")
+              }
+
+          }
+          // var item = document.createElement('li');
+          // item.textContent = msg;
+          
+          window.scrollTo(0, document.body.scrollHeight);
+      });
+    </script>
+  </body>
+</html>
